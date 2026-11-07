@@ -1,0 +1,651 @@
+<!doctype html>
+<html lang="sk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Nástroje SMR</title>
+<style>
+  :root {
+    --bg: #f6f5f1; --card: #ffffff; --ink: #1c2430; --muted: #5d6673; --line: #e2e0d8;
+    --accent: #1f6f78; --accent-ink: #ffffff; --accent-soft: #e3f0f0;
+    --ok: #2f7d4f; --ok-soft: #e4f2e9; --warn: #a3620a; --warn-soft: #fbf0dc;
+    --bad: #b3362d; --bad-soft: #f8e3e1; --radius: 12px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #12161c; --card: #1b2028; --ink: #e8eaed; --muted: #9aa3ad; --line: #2c333d;
+      --accent: #5fb3ba; --accent-ink: #0d1316; --accent-soft: #1d3236;
+      --ok: #6cc58f; --ok-soft: #1b2e23; --warn: #e3a64a; --warn-soft: #33291a;
+      --bad: #ee7b72; --bad-soft: #3a2120;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 16px; line-height: 1.5; }
+  a { color: var(--accent); }
+  header.lista { display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--card); position: sticky; top: 0; z-index: 5; }
+  header.lista .znacka { font-weight: 700; letter-spacing: .01em; text-decoration: none; color: var(--ink); }
+  header.lista .kto { font-size: 13px; color: var(--muted); display: flex; gap: 10px; align-items: center; }
+  main { max-width: 960px; margin: 0 auto; padding: 20px 16px 80px; }
+  h1 { font-size: 24px; line-height: 1.25; margin: 4px 0 6px; }
+  h2 { font-size: 18px; margin: 28px 0 10px; }
+  h3 { font-size: 15px; margin: 0 0 6px; }
+  p.uvod { color: var(--muted); margin: 0 0 20px; }
+  .karta { overflow-wrap: anywhere; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .mriezka { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 12px; }
+  .dlazdica { display: block; text-decoration: none; color: inherit; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); padding: 18px; min-height: 130px; position: relative; }
+  .dlazdica:hover { border-color: var(--accent); }
+  .dlazdica .ikona { font-size: 26px; line-height: 1; margin-bottom: 10px; }
+  .dlazdica .popis { color: var(--muted); font-size: 14px; }
+  .dlazdica.neaktivna { opacity: .55; pointer-events: none; }
+  .stitok { display: inline-block; font-size: 12px; font-weight: 600; padding: 2px 8px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); white-space: nowrap; }
+  .stitok.ok { background: var(--ok-soft); color: var(--ok); }
+  .stitok.warn { background: var(--warn-soft); color: var(--warn); }
+  .stitok.bad { background: var(--bad-soft); color: var(--bad); }
+  .stitok.siva { background: var(--line); color: var(--muted); }
+  .dlazdica .stitok { position: absolute; top: 14px; right: 14px; }
+  label { display: block; font-size: 14px; font-weight: 600; margin: 14px 0 6px; }
+  label .pom { font-weight: 400; color: var(--muted); }
+  input[type=text], input[type=email], textarea, select {
+    width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 10px 12px; }
+  textarea { min-height: 90px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; border-color: transparent; }
+  button, .tlacidlo { font: inherit; font-weight: 600; border: 1px solid var(--accent); background: var(--accent);
+    color: var(--accent-ink); padding: 10px 16px; border-radius: 8px; cursor: pointer; text-decoration: none;
+    display: inline-flex; align-items: center; gap: 6px; }
+  button.druhe, .tlacidlo.druhe { background: transparent; color: var(--accent); }
+  button.male { padding: 5px 10px; font-size: 13px; }
+  button.nebezpecne { background: transparent; color: var(--bad); border-color: var(--bad); }
+  button:disabled { opacity: .5; cursor: default; }
+  .rad { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .volby { display: flex; gap: 8px; flex-wrap: wrap; }
+  .volby label { margin: 0; font-weight: 500; display: flex; gap: 8px; align-items: center; border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 12px; cursor: pointer; background: var(--bg); }
+  .volby input { accent-color: var(--accent); }
+  .zoznam .polozka { display: flex; justify-content: space-between; gap: 12px; align-items: center; text-decoration: none; color: inherit;
+    padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--card); margin-bottom: 8px; }
+  .zoznam .polozka:hover { border-color: var(--accent); }
+  .zoznam .datum { font-size: 13px; color: var(--muted); }
+  .priebeh { display: flex; gap: 12px; align-items: center; }
+  .koliesko { width: 20px; height: 20px; border: 3px solid var(--accent-soft); border-top-color: var(--accent); border-radius: 50%;
+    animation: tocit 1s linear infinite; flex: none; }
+  @keyframes tocit { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .koliesko { animation: none; } }
+  .hlaska { border-radius: 10px; padding: 12px 14px; margin: 12px 0; font-size: 14px; }
+  .hlaska.warn { background: var(--warn-soft); color: var(--warn); }
+  .hlaska.bad { background: var(--bad-soft); color: var(--bad); }
+  .hlaska.ok { background: var(--ok-soft); color: var(--ok); }
+  .hlaska ul { margin: 6px 0 0; padding-left: 18px; }
+  .graf { border: 1px solid var(--line); border-radius: var(--radius); background: var(--card); margin-bottom: 14px; overflow: hidden; }
+  .graf.vyradeny { opacity: .55; }
+  .graf .hlava { padding: 12px 14px; border-bottom: 1px solid var(--line); display: grid; gap: 8px; }
+  .graf .hlava .rad { justify-content: space-between; }
+  .riadok { display: grid; grid-template-columns: 28px 1fr; gap: 6px 10px; padding: 10px 14px; border-bottom: 1px solid var(--line); font-size: 14px; }
+  .riadok:last-child { border-bottom: 0; }
+  .riadok.vyradeny { opacity: .5; }
+  .riadok .telo { display: grid; gap: 6px; min-width: 0; }
+  .riadok .hodnoty { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .riadok .hodnoty input { padding: 6px 8px; font-size: 14px; }
+  .riadok .hodnoty span { display: block; font-size: 12px; color: var(--muted); margin-bottom: 2px; }
+  .riadok .zdroj { font-size: 13px; color: var(--muted); overflow-wrap: anywhere; }
+  .riadok input[type=checkbox], .graf input[type=checkbox] { width: 18px; height: 18px; accent-color: var(--accent); margin-top: 2px; }
+  .text-blok { overflow-wrap: anywhere; position: relative; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; }
+  .text-blok .meta { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; margin-bottom: 4px; }
+  .text-blok.odporucany { border-color: var(--accent); }
+  .tabulka-obal { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+  table { border-collapse: collapse; font-size: 13px; min-width: 100%; }
+  th, td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; white-space: nowrap; max-width: 320px; overflow: hidden; text-overflow: ellipsis; }
+  th { background: var(--bg); position: sticky; top: 0; }
+  details { margin: 10px 0; }
+  details > summary { cursor: pointer; font-weight: 600; padding: 6px 0; }
+  ol.postup { padding-left: 20px; margin: 0; }
+  ol.postup li { margin-bottom: 8px; }
+  .nenapadne { color: var(--muted); font-size: 14px; }
+  .pocet { font-variant-numeric: tabular-nums; }
+  .pocet.prekrocene { color: var(--bad); font-weight: 700; }
+  .stred { min-height: 70vh; display: grid; place-items: center; }
+  .prihlasenie { width: 100%; max-width: 380px; }
+  .skryte { display: none !important; }
+  @media (max-width: 560px) {
+    h1 { font-size: 21px; }
+    .riadok .hodnoty { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<header class="lista skryte" id="lista">
+  <a class="znacka" href="#/">Nástroje SMR</a>
+  <div class="kto"><span id="kto"></span><button class="druhe male" id="odhlasit">Odhlásiť</button></div>
+</header>
+<main id="obsah"></main>
+
+<script type="module">
+import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm";
+
+const SUPABASE_URL = "https://kdacbuugbasxlimoklxt.supabase.co";
+const SUPABASE_KLUC = "sb_publishable_oPAZhJeBgt_cBVBtPlE9dA_r2mwYefJ";
+const FUNKCIA = "flourish-automat";
+// Vzorová infografika vo Flourishi, ktorú redaktor duplikuje (nastavenia a väzby stĺpcov sú v nej hotové)
+const FLOURISH_VZOR = "https://app.flourish.studio/visualisation/30839991/edit";
+
+const sb = createClient(SUPABASE_URL, SUPABASE_KLUC);
+const $ = (s, el = document) => el.querySelector(s);
+const obsah = $("#obsah");
+let ja = null;          // { email, rola }
+let casovac = null;     // obnovovanie stavu
+let posledneSpustenie = 0;
+let rozpracovane = null; // upravované údaje na kontrolu { id, tabulky }
+
+const STAVY = {
+  resers: ["Hľadám údaje", ""],
+  data_na_kontrolu: ["Čaká na tvoju kontrolu", "warn"],
+  tvorba: ["Staviam infografiku", ""],
+  hotovo: ["Hotové", "ok"],
+  chyba: ["Chyba", "bad"],
+};
+const TYPY = ["cislo", "pruhovy", "stlpcovy", "ciarovy", "kolac", "skladany", "skladany100", "casova_os", "stitky",
+  "kroky", "retaz", "porovnanie", "tok", "skala", "zoznam_ikony", "vysvetlivka", "ikonove_pole", "teplomer"];
+const NAZVY_TYPOV = { cislo: "veľké čísla", pruhovy: "pruhy", stlpcovy: "stĺpce", ciarovy: "čiara", kolac: "koláč",
+  skladany: "skladaný", skladany100: "skladaný na 100 %", casova_os: "časová os", stitky: "štítky", kroky: "kroky",
+  retaz: "reťaz", porovnanie: "porovnanie", tok: "tok", skala: "škála", zoznam_ikony: "zoznam s ikonami",
+  vysvetlivka: "vysvetlivka", ikonove_pole: "ikonové pole", teplomer: "teplomer" };
+const OVERENIE = { overene: ["overené", "ok"], s_vyhradou: ["s výhradou", "warn"], neoverene: ["neoverené", "bad"] };
+
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+function bezpecnyOdkaz(u) {
+  return /^https?:\/\//i.test(u ?? "") ? u : "";
+}
+function znaky(s) { return [...(s ?? "")].length; }
+function datum(iso) {
+  return new Date(iso).toLocaleString("sk-SK", { day: "numeric", month: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+function zastavCasovac() { if (casovac) { clearInterval(casovac); casovac = null; } }
+
+async function volaj(akcia, data = {}) {
+  const { data: odp, error } = await sb.functions.invoke(FUNKCIA, { body: { akcia, ...data } });
+  if (error) {
+    let sprava = error.message;
+    try { const t = await error.context?.json(); if (t?.chyba) sprava = t.chyba; } catch { /* nič */ }
+    throw new Error(sprava);
+  }
+  return odp;
+}
+
+function hlaska(text, typ = "bad") {
+  const d = document.createElement("div");
+  d.className = `hlaska ${typ}`;
+  d.textContent = text;
+  return d;
+}
+
+async function kopiruj(text, tlacidlo) {
+  try {
+    await navigator.clipboard.writeText(text);
+    const p = tlacidlo.textContent; tlacidlo.textContent = "Skopírované"; setTimeout(() => (tlacidlo.textContent = p), 1500);
+  } catch { alert("Kopírovanie nefunguje, označ text ručne."); }
+}
+
+function stiahni(nazov, text) {
+  const blob = new Blob([text], { type: "text/csv;charset=utf-8" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nazov; a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+// ---------- prihlásenie ----------
+
+function obrazovkaPrihlasenia(sprava) {
+  $("#lista").classList.add("skryte");
+  obsah.innerHTML = `
+    <div class="stred"><div class="prihlasenie karta">
+      <h1>Nástroje SMR</h1>
+      <p class="uvod">Prihlás sa e-mailom. Pošleme ti odkaz, ktorý ťa prihlási. Prístup majú len pozvané adresy.</p>
+      <form id="formPrihlasenie">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" required autocomplete="email">
+        <div style="margin-top:14px"><button type="submit">Poslať prihlasovací odkaz</button></div>
+      </form>
+      <div id="sprava"></div>
+    </div></div>`;
+  if (sprava) $("#sprava").append(sprava);
+  $("#formPrihlasenie").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const tl = e.target.querySelector("button"); tl.disabled = true;
+    const email = $("#email").value.trim();
+    const { error } = await sb.auth.signInWithOtp({
+      email, options: { emailRedirectTo: location.origin + location.pathname },
+    });
+    $("#sprava").innerHTML = "";
+    if (error) {
+      const msg = /database|not allowed|signup/i.test(error.message)
+        ? "Tento e-mail nemá prístup k nástrojom." : `Nepodarilo sa poslať odkaz: ${error.message}`;
+      $("#sprava").append(hlaska(msg));
+      tl.disabled = false;
+    } else {
+      $("#sprava").append(hlaska("Odkaz je na ceste. Otvor e-mail na tomto zariadení a klikni naň.", "ok"));
+    }
+  });
+}
+
+// ---------- rozcestník ----------
+
+function rozcestnik() {
+  obsah.innerHTML = `
+    <h1>Nástroje</h1>
+    <p class="uvod">Vyber nástroj. Postupy a pravidlá bežia na serveri.</p>
+    <div class="mriezka">
+      <a class="dlazdica" href="#/flourish">
+        <div class="ikona" aria-hidden="true">▤</div>
+        <h3>Flourish automat</h3>
+        <div class="popis">Od témy k overeným údajom a hotovým datasetom pre šablónu infografiky.</div>
+      </a>
+      <div class="dlazdica neaktivna"><span class="stitok siva">čoskoro</span>
+        <div class="ikona" aria-hidden="true">▶</div><h3>Explainer videá</h3>
+        <div class="popis">Z článku krátke vysvetľujúce video s hlasom.</div></div>
+      <div class="dlazdica neaktivna"><span class="stitok siva">čoskoro</span>
+        <div class="ikona" aria-hidden="true">✂</div><h3>AI strižňa</h3>
+        <div class="popis">Strih rozhovoru, titulky a sprievodný text.</div></div>
+      <div class="dlazdica neaktivna"><span class="stitok siva">čoskoro</span>
+        <div class="ikona" aria-hidden="true">◧</div><h3>Koláže</h3>
+        <div class="popis">Titulné koláže k článkom vo vizuáli projektu.</div></div>
+      ${ja?.rola === "admin" ? `
+      <a class="dlazdica" href="#/pristupy">
+        <div class="ikona" aria-hidden="true">⚿</div><h3>Prístupy</h3>
+        <div class="popis">Kto sa môže prihlásiť a koľko sa minulo za 30 dní.</div></a>` : ""}
+    </div>`;
+}
+
+// ---------- Flourish: zoznam a nové zadanie ----------
+
+async function flourishZoznam() {
+  obsah.innerHTML = `
+    <p><a href="#/">← Nástroje</a></p>
+    <h1>Flourish automat</h1>
+    <p class="uvod">Zadaj tému. Nástroj nájde a overí údaje, ty ich skontroluješ a potom dostaneš oba súbory pre šablónu euBrief infografika 2.0 aj texty k článku.</p>
+    <details class="karta" id="noveObal" open>
+      <summary>Nové zadanie</summary>
+      <form id="formNove">
+        <label for="tema">Téma</label>
+        <input type="text" id="tema" required maxlength="500" placeholder="Napr. Nezamestnanosť mladých v EÚ, september 2026">
+        <label>Formát</label>
+        <div class="volby">
+          <label><input type="radio" name="format" value="velka" checked> Veľká infografika (5 – 6 grafov)</label>
+          <label><input type="radio" name="format" value="mini"> Mini prvok do článku</label>
+        </div>
+        <label for="kontext">Uhol, kontext alebo text článku <span class="pom">(nepovinné)</span></label>
+        <textarea id="kontext" maxlength="20000"></textarea>
+        <label for="zdroje">Odkazy na zdroje <span class="pom">(jeden na riadok, nepovinné)</span></label>
+        <textarea id="zdroje" style="min-height:70px" placeholder="https://ec.europa.eu/eurostat/..."></textarea>
+        <label for="data">Vlastné údaje <span class="pom">(vlož tabuľku, nepovinné)</span></label>
+        <textarea id="data" maxlength="30000"></textarea>
+        <label for="pokyny">Pokyny <span class="pom">(nepovinné)</span></label>
+        <input type="text" id="pokyny" maxlength="3000" placeholder="Napr. porovnaj V4, bez koláčových grafov">
+        <div style="margin-top:16px"><button type="submit">Spustiť rešerš</button></div>
+      </form>
+      <div id="spravaNove"></div>
+    </details>
+    <h2>Zadania</h2>
+    <div class="zoznam" id="zoznam"><p class="nenapadne">Načítavam…</p></div>`;
+
+  $("#formNove").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const tl = e.target.querySelector("button"); tl.disabled = true; tl.textContent = "Spúšťam…";
+    try {
+      const odp = await volaj("nove", {
+        tema: $("#tema").value,
+        format: e.target.format.value,
+        kontext: $("#kontext").value,
+        zdroje: $("#zdroje").value.split(/\s+/).filter(Boolean),
+        vlozene_data: $("#data").value,
+        pokyny: $("#pokyny").value,
+      });
+      location.hash = `#/flourish/${odp.id}`;
+    } catch (err) {
+      $("#spravaNove").replaceChildren(hlaska(err.message));
+      tl.disabled = false; tl.textContent = "Spustiť rešerš";
+    }
+  });
+
+  const nacitajZoznam = async () => {
+    const { data, error } = await sb.from("zadania").select("id, nazov, stav, prebieha, vytvorene, upravene")
+      .eq("nastroj", "flourish").order("vytvorene", { ascending: false }).limit(50);
+    const el = $("#zoznam");
+    if (!el) return;
+    if (error) { el.replaceChildren(hlaska("Zadania sa nepodarilo načítať.")); return; }
+    if (!data.length) { el.innerHTML = `<p class="nenapadne">Zatiaľ žiadne zadania.</p>`; $("#noveObal").open = true; return; }
+    el.innerHTML = data.map((z) => {
+      const [nazov, typ] = STAVY[z.stav] ?? [z.stav, ""];
+      return `<a class="polozka" href="#/flourish/${z.id}">
+        <div><div>${esc(z.nazov)}</div><div class="datum">${datum(z.vytvorene)}</div></div>
+        <span class="stitok ${typ}">${nazov}</span></a>`;
+    }).join("");
+  };
+  await nacitajZoznam();
+  casovac = setInterval(nacitajZoznam, 10000);
+}
+
+// ---------- Flourish: detail zadania ----------
+
+async function flourishDetail(id) {
+  obsah.innerHTML = `<p><a href="#/flourish">← Zadania</a></p><div id="detail"><p class="nenapadne">Načítavam…</p></div>`;
+  let poslednyStav = null;
+  let poslednaVerzia = null;
+
+  const obnov = async () => {
+    const { data: z, error } = await sb.from("zadania").select("*").eq("id", id).maybeSingle();
+    const el = $("#detail");
+    if (!el) return;
+    if (error || !z) { el.replaceChildren(hlaska("Zadanie sa nenašlo.")); zastavCasovac(); return; }
+
+    // beh na pozadí sa preruší po ~2 minútach: požiadame server, nech pokračuje
+    const bezi = ["resers", "tvorba"].includes(z.stav);
+    const zaseknute = z.prebieha && Date.now() - new Date(z.upravene).getTime() > 175000;
+    if (bezi && (!z.prebieha || zaseknute) && Date.now() - posledneSpustenie > 20000) {
+      posledneSpustenie = Date.now();
+      volaj("pokracuj", { id }).catch(() => {});
+    }
+
+    const verzia = z.vysledok?.verzia ?? null;
+    const kluc = `${z.stav}|${z.chyba ?? ""}|${verzia}`;
+    if (bezi) { vykresliPriebeh(el, z); poslednyStav = kluc; return; }
+    if (kluc === poslednyStav && verzia === poslednaVerzia) return; // nič nové, nerušíme rozpísané úpravy
+    poslednyStav = kluc; poslednaVerzia = verzia;
+    if (z.stav === "data_na_kontrolu") vykresliKontrolu(el, z);
+    else if (z.stav === "hotovo") vykresliVysledok(el, z);
+    else if (z.stav === "chyba") vykresliChybu(el, z);
+  };
+  await obnov();
+  casovac = setInterval(obnov, 3000);
+}
+
+function hlavicka(z) {
+  const [nazov, typ] = STAVY[z.stav] ?? [z.stav, ""];
+  return `<div class="rad" style="justify-content:space-between">
+      <span class="stitok ${typ}">${nazov}</span>
+      <span class="nenapadne">${z.vstup?.format === "mini" ? "mini prvok" : "veľká infografika"} · ${datum(z.vytvorene)}</span>
+    </div>
+    <h1>${esc(z.nazov)}</h1>`;
+}
+
+function vykresliPriebeh(el, z) {
+  el.innerHTML = `${hlavicka(z)}
+    <div class="karta priebeh"><div class="koliesko" aria-hidden="true"></div>
+      <div><div>${esc(z.priebeh || STAVY[z.stav]?.[0] || "Pracujem")}</div>
+      <div class="nenapadne">Rešerš trvá zvyčajne 2 až 5 minút, stavba infografiky 1 až 3. Stránku môžeš zavrieť, práca pokračuje, keď ju znova otvoríš.</div></div>
+    </div>
+    ${z.chyba ? `<div class="hlaska bad">${esc(z.chyba)}</div>` : ""}`;
+}
+
+function vykresliChybu(el, z) {
+  el.innerHTML = `${hlavicka(z)}
+    <div class="hlaska bad">${esc(z.chyba || "Niečo sa pokazilo.")}</div>
+    <div class="rad"><button id="znova">Skúsiť znova</button><button class="nebezpecne" id="zmaz">Zmazať zadanie</button></div>`;
+  $("#znova").onclick = async (e) => {
+    e.target.disabled = true;
+    try { await volaj("pokracuj", { id: z.id, znova: true }); } catch (err) { el.append(hlaska(err.message)); }
+  };
+  $("#zmaz").onclick = () => zmazZadanie(z.id);
+}
+
+async function zmazZadanie(id) {
+  if (!confirm("Zmazať zadanie aj s výsledkom? Nedá sa to vrátiť.")) return;
+  try { await volaj("zmaz", { id }); location.hash = "#/flourish"; } catch (err) { alert(err.message); }
+}
+
+// Kontrola údajov: redaktor vyberie grafy a riadky a môže opraviť hodnoty
+function vykresliKontrolu(el, z, nadpis = true) {
+  if (!rozpracovane || rozpracovane.id !== z.id) rozpracovane = { id: z.id, tabulky: structuredClone(z.data_tabulky) };
+  const t = rozpracovane.tabulky;
+  const pocty = { overene: 0, s_vyhradou: 0, neoverene: 0 };
+  t.grafy.forEach((g) => g.riadky.forEach((r) => pocty[r.overenie] = (pocty[r.overenie] ?? 0) + 1));
+
+  el.innerHTML = `${nadpis ? hlavicka(z) : ""}
+    ${z.chyba ? `<div class="hlaska bad">${esc(z.chyba)}</div>` : ""}
+    <div class="karta"><h3>${esc(t.nazov_temy)}</h3><div>${esc(t.zhrnutie)}</div>
+      <div class="rad" style="margin-top:10px">
+        <span class="stitok ok">${pocty.overene} overených</span>
+        <span class="stitok warn">${pocty.s_vyhradou} s výhradou</span>
+        <span class="stitok bad">${pocty.neoverene} neoverených</span>
+      </div></div>
+    ${t.upozornenia?.length ? `<div class="hlaska warn"><strong>Upozornenia z rešerše</strong><ul>${t.upozornenia.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></div>` : ""}
+    <p class="nenapadne">Odškrtni grafy a riadky, ktoré nechceš. Hodnoty môžeš opraviť priamo v políčkach: graf sa kreslí podľa čísla, čitateľ uvidí text.</p>
+    <div id="grafy"></div>
+    ${t.zdroje?.length ? `<details><summary>Zdroje (${t.zdroje.length})</summary><ul>${t.zdroje.map((s) => {
+      const u = bezpecnyOdkaz(s.url);
+      return `<li>${u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(s.nazov)}</a>` : esc(s.nazov)}</li>`;
+    }).join("")}</ul></details>` : ""}
+    <div class="karta">
+      <label for="pokynyTvorba" style="margin-top:0">Pokyny k infografike <span class="pom">(nepovinné)</span></label>
+      <textarea id="pokynyTvorba" style="min-height:60px" placeholder="Napr. hlavný uhol je Slovensko a V4, titulok bez čísla"></textarea>
+      <div class="rad" style="margin-top:12px">
+        <button id="schval">Schváliť údaje a postaviť infografiku</button>
+        ${nadpis ? `<button class="nebezpecne" id="zmaz">Zmazať</button>` : ""}
+      </div>
+      <div id="spravaSchval"></div>
+    </div>`;
+
+  const grafy = $("#grafy", el);
+  t.grafy.forEach((g, gi) => {
+    const d = document.createElement("div");
+    d.className = "graf" + (g.pouzit === false ? " vyradeny" : "");
+    d.innerHTML = `
+      <div class="hlava">
+        <div class="rad">
+          <label style="margin:0;display:flex;gap:8px;align-items:center"><input type="checkbox" data-g="${gi}" ${g.pouzit !== false ? "checked" : ""}> Použiť graf</label>
+          <select data-typ="${gi}" style="width:auto;padding:6px 8px">${TYPY.map((ty) => `<option value="${ty}" ${ty === g.navrh_typu ? "selected" : ""}>${NAZVY_TYPOV[ty]}</option>`).join("")}</select>
+        </div>
+        <input type="text" data-nadpis="${gi}" value="${esc(g.navrh_nadpisu)}" aria-label="Nadpis grafu">
+        <div class="nenapadne">${esc(g.popis)}</div>
+      </div>
+      ${g.riadky.map((r, ri) => {
+        const [ov, ovTyp] = OVERENIE[r.overenie] ?? ["?", "siva"];
+        const u = bezpecnyOdkaz(r.zdroj_url);
+        const cisel = r.hodnota !== null && r.hodnota !== undefined;
+        return `<div class="riadok${r.pouzit === false ? " vyradeny" : ""}">
+          <input type="checkbox" data-r="${gi}:${ri}" ${r.pouzit !== false ? "checked" : ""} aria-label="Použiť riadok">
+          <div class="telo">
+            <div class="rad" style="justify-content:space-between"><strong>${esc(r.kategoria || r.text.slice(0, 80))}${r.seria ? ` · <span class="nenapadne">${esc(r.seria)}</span>` : ""}</strong>
+              <span class="stitok ${ovTyp}">${ov}</span></div>
+            ${cisel ? `<div class="hodnoty">
+              <label style="margin:0;font-weight:400"><span>Číslo pre graf</span><input type="text" inputmode="decimal" data-hodnota="${gi}:${ri}" value="${esc(r.hodnota)}"></label>
+              <label style="margin:0;font-weight:400"><span>Text pre čitateľa</span><input type="text" data-zobrazit="${gi}:${ri}" value="${esc(r.zobrazit)}"></label>
+            </div>` : (r.text ? `<div>${esc(r.text)}</div>` : "")}
+            ${r.poznamka ? `<div class="nenapadne">${esc(r.poznamka)}</div>` : ""}
+            <div class="zdroj">${u ? `<a href="${esc(u)}" target="_blank" rel="noopener">${esc(r.zdroj_nazov || u)}</a>` : esc(r.zdroj_nazov || "bez zdroja")}</div>
+          </div></div>`;
+      }).join("")}`;
+    grafy.append(d);
+  });
+
+  grafy.addEventListener("change", (e) => {
+    const x = e.target;
+    if (x.dataset.g !== undefined) { t.grafy[x.dataset.g].pouzit = x.checked; x.closest(".graf").classList.toggle("vyradeny", !x.checked); }
+    if (x.dataset.typ !== undefined) t.grafy[x.dataset.typ].navrh_typu = x.value;
+    if (x.dataset.r) { const [gi, ri] = x.dataset.r.split(":"); t.grafy[gi].riadky[ri].pouzit = x.checked; x.closest(".riadok").classList.toggle("vyradeny", !x.checked); }
+  });
+  grafy.addEventListener("input", (e) => {
+    const x = e.target;
+    if (x.dataset.nadpis !== undefined) t.grafy[x.dataset.nadpis].navrh_nadpisu = x.value;
+    if (x.dataset.zobrazit) { const [gi, ri] = x.dataset.zobrazit.split(":"); t.grafy[gi].riadky[ri].zobrazit = x.value; }
+    if (x.dataset.hodnota) {
+      const [gi, ri] = x.dataset.hodnota.split(":");
+      const n = Number(x.value.replace(/\s/g, "").replace(",", "."));
+      x.style.borderColor = Number.isFinite(n) ? "" : "var(--bad)";
+      if (Number.isFinite(n)) {
+        const r = t.grafy[gi].riadky[ri];
+        if (r.hodnota !== n) { r.hodnota = n; r.poznamka = (r.poznamka ? r.poznamka + " " : "") + "(hodnotu upravil redaktor)"; }
+      }
+    }
+  });
+
+  $("#schval", el).onclick = async (e) => {
+    e.target.disabled = true;
+    try {
+      await volaj("schval_data", { id: z.id, data_tabulky: t, pokyny: $("#pokynyTvorba", el).value });
+      rozpracovane = null;
+    } catch (err) { $("#spravaSchval", el).replaceChildren(hlaska(err.message)); e.target.disabled = false; }
+  };
+  const zm = $("#zmaz", el); if (zm) zm.onclick = () => zmazZadanie(z.id);
+}
+
+function vykresliVysledok(el, z) {
+  const v = z.vysledok; const inf = v.infografika; const tx = inf.texty;
+  const mini = v.format === "mini";
+  const nazovSuboru = (tx.nazov_vo_flourishi || z.nazov).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 50) || "infografika";
+
+  const textBlok = (meta, text, limit, odporucany = false) => {
+    const n = znaky(text);
+    return `<div class="text-blok${odporucany ? " odporucany" : ""}">
+      <div class="meta"><span>${meta}</span>
+        <span class="rad">${limit ? `<span class="pocet${n > limit ? " prekrocene" : ""}">${n} / ${limit}</span>` : ""}
+        <button class="druhe male" data-kopiruj="${esc(text)}">Kopírovať</button></span></div>
+      <div>${esc(text)}</div></div>`;
+  };
+
+  el.innerHTML = `${hlavicka(z)}
+    ${z.chyba ? `<div class="hlaska bad">${esc(z.chyba)}</div>` : ""}
+    ${v.upozornenia?.length ? `<div class="hlaska warn"><strong>Skontroluj</strong><ul>${v.upozornenia.map((u) => `<li>${esc(u)}</li>`).join("")}</ul></div>` : `<div class="hlaska ok">Kontrola kódom nenašla chyby.</div>`}
+
+    <h2>Súbory pre Flourish</h2>
+    <div class="karta">
+      <div class="rad">
+        <button id="stiahniBloky">Stiahnuť Bloky.csv</button>
+        <button id="stiahniData">Stiahnuť Data.csv</button>
+      </div>
+      <details><summary>Postup vo Flourishi</summary>
+        <ol class="postup">
+          <li>Otvor <a href="${FLOURISH_VZOR}" target="_blank" rel="noopener">vzorovú infografiku</a> a daj <strong>Duplicate</strong>. Nastavenia a farby zostanú.</li>
+          ${mini ? `<li>V nastaveniach <strong>Rozloženie → Typ grafiky</strong> vyber <strong>Mini prvok do článku</strong>.</li>` : ""}
+          <li>Na karte <strong>Data</strong> vyber tabuľku <strong>Bloky</strong> → <strong>Upload data</strong> → súbor Bloky.csv → <strong>Replace</strong>.</li>
+          <li>To isté pre tabuľku <strong>Data</strong> so súborom Data.csv.</li>
+          <li>Over, že väzby stĺpcov sú Bloky A až P a Data A až J.</li>
+          <li>Premenuj na: <em>${esc(tx.nazov_vo_flourishi)}</em> a daj <strong>Export &amp; publish</strong>.</li>
+        </ol>
+      </details>
+    </div>
+
+    <h2>Texty k článku</h2>
+    ${tx.titulky.map((t, i) => textBlok(`Titulok · ${esc(t.uhol)}${i === tx.odporucany_titulok ? " · odporúčaný" : ""}`, t.titulok, 0, i === tx.odporucany_titulok)).join("")}
+    ${textBlok("Perex", tx.perex, 170)}
+    ${textBlok("SME Minúta", tx.minuta, 160)}
+    ${textBlok("Názov vo Flourishi", tx.nazov_vo_flourishi, 0)}
+
+    <h2>Kontrola tvrdení</h2>
+    ${inf.kontrola_tvrdeni.map((k) => {
+      const typ = k.verdikt === "sedí" ? "ok" : k.verdikt === "nesedí" ? "bad" : "warn";
+      return `<div class="karta"><div class="rad" style="justify-content:space-between"><strong>${esc(k.tvrdenie)}</strong><span class="stitok ${typ}">${esc(k.verdikt)}</span></div>
+        <div class="nenapadne">${esc(k.overenie)}</div></div>`;
+    }).join("")}
+    ${inf.poznamky_pre_redaktora?.length ? `<div class="hlaska warn"><strong>Poznámky</strong><ul>${inf.poznamky_pre_redaktora.map((p) => `<li>${esc(p)}</li>`).join("")}</ul></div>` : ""}
+
+    <details><summary>Náhľad tabuľky Bloky (${inf.bloky.length} riadkov)</summary>${tabulka(inf.bloky)}</details>
+    <details><summary>Náhľad tabuľky Data (${inf.data.length} riadkov)</summary>${tabulka(inf.data)}</details>
+
+    <h2>Úprava</h2>
+    <div class="karta">
+      <label for="pokynUprava" style="margin-top:0">Čo zmeniť</label>
+      <textarea id="pokynUprava" style="min-height:70px" placeholder="Napr. tretí graf daj ako stĺpce, titulok bez čísla, pridaj vysvetlivku k pojmu HND"></textarea>
+      <div class="rad" style="margin-top:12px">
+        <button id="uprav">Upraviť infografiku</button>
+        <button class="druhe" id="spatUdaje">Zmeniť údaje</button>
+        <button class="nebezpecne" id="zmaz">Zmazať</button>
+      </div>
+      <div id="spravaUprava"></div>
+    </div>
+    <div id="udajeZnova"></div>
+    <p class="nenapadne">Verzia ${v.verzia} · ${datum(v.vytvorene)}</p>`;
+
+  el.querySelectorAll("[data-kopiruj]").forEach((b) => b.onclick = () => kopiruj(b.dataset.kopiruj, b));
+  $("#stiahniBloky", el).onclick = () => stiahni(`${nazovSuboru}-Bloky.csv`, v.csv_bloky);
+  $("#stiahniData", el).onclick = () => stiahni(`${nazovSuboru}-Data.csv`, v.csv_data);
+  $("#uprav", el).onclick = async (e) => {
+    const pokyn = $("#pokynUprava", el).value.trim();
+    if (!pokyn) { $("#spravaUprava", el).replaceChildren(hlaska("Napíš, čo zmeniť.", "warn")); return; }
+    e.target.disabled = true;
+    try { await volaj("uprav", { id: z.id, pokyn }); }
+    catch (err) { $("#spravaUprava", el).replaceChildren(hlaska(err.message)); e.target.disabled = false; }
+  };
+  $("#spatUdaje", el).onclick = () => vykresliKontrolu($("#udajeZnova", el), z, false);
+  $("#zmaz", el).onclick = () => zmazZadanie(z.id);
+}
+
+function tabulka(riadky) {
+  if (!riadky.length) return `<p class="nenapadne">Prázdne.</p>`;
+  const stlpce = Object.keys(riadky[0]);
+  return `<div class="tabulka-obal"><table><thead><tr>${stlpce.map((s) => `<th>${esc(s)}</th>`).join("")}</tr></thead>
+    <tbody>${riadky.map((r) => `<tr>${stlpce.map((s) => `<td title="${esc(r[s])}">${esc(r[s])}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`;
+}
+
+// ---------- prístupy (správca) ----------
+
+async function pristupy() {
+  obsah.innerHTML = `<p><a href="#/">← Nástroje</a></p><h1>Prístupy</h1>
+    <p class="uvod">Prihlásiť sa môžu len tieto e-maily. Redaktor vidí svoje zadania, správca všetky.</p>
+    <div class="karta"><form id="formPristup" class="rad" style="align-items:flex-end">
+      <div style="flex:2;min-width:200px"><label for="pEmail" style="margin-top:0">E-mail</label><input type="email" id="pEmail" required></div>
+      <div style="flex:1;min-width:140px"><label for="pMeno" style="margin-top:0">Meno</label><input type="text" id="pMeno"></div>
+      <div style="min-width:130px"><label for="pRola" style="margin-top:0">Rola</label>
+        <select id="pRola"><option value="redaktor">redaktor</option><option value="admin">správca</option></select></div>
+      <button type="submit">Pridať</button></form><div id="spravaPristup"></div></div>
+    <div id="zoznamPristupov"></div>`;
+
+  const vykresli = (odp) => {
+    const s = odp.spotreba_30_dni;
+    $("#zoznamPristupov").innerHTML = `
+      <div class="zoznam">${odp.pristupy.map((p) => `<div class="polozka"><div><div>${esc(p.meno || p.email)}</div>
+        <div class="datum">${esc(p.email)} · ${p.rola === "admin" ? "správca" : "redaktor"}</div></div>
+        ${p.email !== ja.email ? `<button class="nebezpecne male" data-odober="${esc(p.email)}">Odobrať</button>` : ""}</div>`).join("")}</div>
+      <h2>Spotreba za 30 dní</h2>
+      <div class="karta">${s.volania} volaní modelu · ${s.vstupne_tokeny.toLocaleString("sk-SK")} vstupných a ${s.vystupne_tokeny.toLocaleString("sk-SK")} výstupných tokenov · ${s.vyhladavania} vyhľadávaní</div>`;
+    $("#zoznamPristupov").querySelectorAll("[data-odober]").forEach((b) => b.onclick = async () => {
+      if (!confirm(`Odobrať prístup pre ${b.dataset.odober}?`)) return;
+      try { vykresli(await volaj("pristupy", { operacia: "odober", email: b.dataset.odober })); } catch (err) { alert(err.message); }
+    });
+  };
+  try { vykresli(await volaj("pristupy")); } catch (err) { obsah.append(hlaska(err.message)); }
+  $("#formPristup").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    try {
+      vykresli(await volaj("pristupy", { operacia: "pridaj", email: $("#pEmail").value, meno: $("#pMeno").value, rola: $("#pRola").value }));
+      e.target.reset(); $("#spravaPristup").replaceChildren();
+    } catch (err) { $("#spravaPristup").replaceChildren(hlaska(err.message)); }
+  });
+}
+
+// ---------- smerovanie ----------
+
+async function smeruj() {
+  zastavCasovac();
+  const { data: { session } } = await sb.auth.getSession();
+  if (!session) return obrazovkaPrihlasenia();
+  if (!ja) {
+    try { ja = await volaj("ja"); }
+    catch (err) { await sb.auth.signOut(); return obrazovkaPrihlasenia(hlaska(err.message)); }
+  }
+  $("#lista").classList.remove("skryte");
+  $("#kto").textContent = ja.email;
+  const h = location.hash.replace(/^#/, "") || "/";
+  const m = h.match(/^\/flourish\/([0-9a-f-]{36})$/);
+  if (m) return flourishDetail(m[1]);
+  if (h === "/flourish") return flourishZoznam();
+  if (h === "/pristupy" && ja.rola === "admin") return pristupy();
+  rozcestnik();
+}
+
+$("#odhlasit").onclick = async () => { await sb.auth.signOut(); ja = null; location.hash = "#/"; smeruj(); };
+window.addEventListener("hashchange", smeruj);
+sb.auth.onAuthStateChange((udalost) => {
+  if (udalost === "SIGNED_IN" && !ja) smeruj();
+});
+smeruj();
+</script>
+</body>
+</html>
